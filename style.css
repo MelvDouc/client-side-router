@@ -1,0 +1,38 @@
+*,
+::before,
+::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+header {
+  background-color: rgb(25, 25, 151);
+  color: white;
+  padding: 0.8em;
+}
+
+header ul {
+  list-style: none;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+header li {
+  padding: 0.25em;
+}
+
+header a {
+  color: inherit;
+}
+
+main {
+  padding: 1em;
+}
