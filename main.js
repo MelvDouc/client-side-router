@@ -36,7 +36,7 @@ async function handleLocation() {
     if (key instanceof RegExp && key.test(path) || key === path) {
       const { title, template } = routes.get(key);
       document.title = title;
-      const html = await fetch(`/templates/${template}`)
+      const html = await fetch(`/${githubPath}/templates/${template}`)
         .then((res) => res.text())
         .catch((err) => {
           console.log(err);
