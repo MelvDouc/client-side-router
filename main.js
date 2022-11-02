@@ -6,9 +6,9 @@ const routes = new Map()
     title: "Home",
     template: "home.html"
   })
-  .set("/about", {
-    title: "About",
-    template: "about.html"
+  .set("/page1", {
+    title: "Page 1",
+    template: "page1.html"
   });
 
 // Run on page load  
@@ -16,15 +16,15 @@ await handleLocation();
 // Run on prev/next page navigator button click
 window.addEventListener("popstate", handleLocation);
 // Run on anchor click
-document.querySelectorAll("a").forEach((a) => {
-  a.addEventListener("click", async (e) => {
-    // Prevent navigation
-    e.preventDefault();
-    // Update url
-    window.history.pushState({}, "", a.href);
-    // Update page content
-    await handleLocation();
-  });
+document.addEventListener("click", async (e) => {
+  if (!(e.target instanceof HTMLAnchorElement))
+    return;
+  // Prevent navigation
+  e.preventDefault();
+  // Update url
+  window.history.pushState({}, "", e.target.href);
+  // Update page content
+  await handleLocation();
 });
 
 async function handleLocation() {
