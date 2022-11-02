@@ -1,5 +1,6 @@
+const githubPath = "vanilla-js-spa-router.github.io/";
 const mainElement = document.querySelector("main");
-const pageNotFoundMessage = "<h1>Page not found</h1><a href='/'>Home</a>";
+const pageNotFoundMessage = `<h1>Page not found</h1><a href="/${githubPath}">Home</a>`;
 
 const routes = new Map()
   .set(/^\/(index\.html)?$/, {
@@ -16,7 +17,8 @@ await handleLocation();
 // Run on prev/next page navigator button click
 window.addEventListener("popstate", handleLocation);
 // Run on anchor click
-document.querySelectorAll("header a").forEach((a) => {
+document.querySelectorAll("a").forEach((a) => {
+  a.setAttribute("href", `/${githubPath + a.getAttribute("href")}`);
   a.addEventListener("click", async (e) => {
     // Prevent navigation
     e.preventDefault();
@@ -28,7 +30,7 @@ document.querySelectorAll("header a").forEach((a) => {
 });
 
 async function handleLocation() {
-  const path = "/" + (location.pathname.split("/").slice(1).join("/")) + location.search;
+  const path = location.pathname.replace(`${githubPath}/`, "") + location.search;
 
   for (const key of routes.keys()) {
     if (key instanceof RegExp && key.test(path) || key === path) {
