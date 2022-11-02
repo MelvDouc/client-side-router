@@ -1,5 +1,6 @@
+const GITHUB_PREFIX = "/vanilla-js-spa-router.github.io";
 const mainElement = document.querySelector("main");
-const pageNotFoundMessage = `<h1>Page not found</h1><a href="/">Home</a>`;
+const pageNotFoundMessage = `<h1>Page not found</h1><a href="${GITHUB_PREFIX}">Home</a>`;
 
 const routes = new Map()
   .set(/^\/(index\.html)?$/, {
@@ -26,15 +27,19 @@ document.addEventListener("click", async (e) => {
   // Update page content
   await handleLocation();
 });
+// Add prefix to anchors
+document.querySelectorAll("a").forEach((a) => {
+  a.setAttribute("href", GITHUB_PREFIX + a.getAttribute("href"));
+});
 
 async function handleLocation() {
-  const path = location.pathname + location.search;
+  const path = location.pathname.replace(GITHUB_PREFIX, "") + location.search;
 
   for (const key of routes.keys()) {
     if (key instanceof RegExp && key.test(path) || key === path) {
       const { title, template } = routes.get(key);
       document.title = title;
-      const html = await fetch(`/templates/${template}`)
+      const html = await fetch(`${GITHUB_PREFIX}/templates/${template}`)
         .then((res) => res.text())
         .catch((err) => {
           console.log(err);
