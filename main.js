@@ -1,6 +1,6 @@
 const GITHUB_PREFIX = "/vanilla-js-spa-router.github.io";
 const mainElement = document.querySelector("main");
-const pageNotFoundMessage = `<h1>Page not found</h1><a href="${GITHUB_PREFIX}">Home</a>`;
+const pageNotFoundMessage = `<h1>Page not found</h1><a href="${GITHUB_PREFIX}/">Home</a>`;
 
 const routes = new Map()
   .set(/^\/(index\.html)?$/, {
