@@ -28,7 +28,7 @@ document.querySelectorAll("header a").forEach((a) => {
 });
 
 async function handleLocation() {
-  const path = location.pathname.replace("/vanilla-js-spa-router.github.io", "") + location.search;
+  const path = "/" + (location.pathname.split("/").slice(1).join("/")) + location.search;
 
   for (const key of routes.keys()) {
     if (key instanceof RegExp && key.test(path) || key === path) {
