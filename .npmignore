@@ -1,4 +1,8 @@
-*
-!dist
-!package.json
-!README.me
+.vscode
+node_modules
+src
+test-app
+
+.gitignore
+tsconfig.json
+tsup.config.js

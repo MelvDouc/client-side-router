@@ -5,6 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script type="module" src="/main.js"></script>
   <title>My Website</title>
+  <style>
+    body {
+      margin: 0;
+    }
+
+    body.loading {
+      animation: bg_color 1000ms infinite;
+    }
+
+    @keyframes bg_color {
+      0% {
+        background-color: blue;
+      }
+      50% {
+        background-color: green;
+      }
+      100% {
+        background-color: blue;
+      }
+    }
+  </style>
 </head>
 <body>
   <main id="router-outlet"></main>

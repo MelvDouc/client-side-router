@@ -17,6 +17,13 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (req.url === "/api/v1/numbers") {
+    const numbers = Array(1e7).fill(0);
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify(numbers));
+    return;
+  }
+
   await serve(join(root, "index.html"), "text/html", res);
 });
 

@@ -1,28 +1,13 @@
+import type RouterRequest from "$src/RouterRequest.js";
+import type RouterResponse from "$src/RouterResponse.js";
+
+type PathName = `/${string}`;
 type Props = Record<string, string>;
 type Handler<T extends Props> = (request: RouterRequest<T>, response: RouterResponse) => void | Promise<void>;
 
 interface Route<T extends Props> {
   readonly regex: RegExp;
   readonly handler: Handler<T>;
-}
-
-interface RouterRequest<T extends Props> {
-  readonly pathname: string;
-  /**
-   * For example, the pathname `/profile/:id` will produce the params `{ id: string }`.
-   */
-  readonly params: T;
-}
-
-interface RouterResponse {
-  /**
-   * Set the document title.
-   */
-  setTitle: (title: string) => RouterResponse;
-  /**
-   * Define the component corresponding to the current route.
-   */
-  setComponent: (component: Node) => void;
 }
 
 type InferProps<S extends string, P extends Props = {}> =
@@ -36,9 +21,8 @@ type InferProps<S extends string, P extends Props = {}> =
 
 export type {
   InferProps,
+  PathName,
   Props,
   Handler,
-  RouterRequest,
-  RouterResponse,
   Route,
 };

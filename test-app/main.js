@@ -1,55 +1,68 @@
 import { Router } from "../dist/index.js";
 
 const routerOutlet = document.getElementById("router-outlet");
-const router = new Router({
-  updateTitle: (title) => `${title} | My Website`
+const router = new Router();
+
+router.onNavigationStarted(() => {
+  document.body.classList.add("loading");
 });
 
-router.onComponentUpdate((component) => {
-  routerOutlet.replaceChildren(component);
+router.onNavigationComplete(({ component, documentTitle }) => {
+  document.title = documentTitle ? `${documentTitle} | My Website` : "My Website";
+  if (component)
+    routerOutlet.replaceChildren(component);
+  document.body.classList.remove("loading");
 });
 
 document.addEventListener("click", (e) => {
   const { target } = e;
-
-  if (!(target instanceof HTMLAnchorElement) || !("internal" in target.dataset))
-    return;
-
-  e.preventDefault();
-  router.navigate(target.getAttribute("href"));
+  if (target instanceof HTMLAnchorElement && "internal" in target.dataset) {
+    e.preventDefault();
+    const pathname = target.getAttribute("href");
+    router.navigate(pathname);
+  }
 });
 
 router
   .setRoute("/", (_, response) => {
-    const anchor = document.createElement("a");
-    anchor.innerText = "Go to profile";
-    anchor.href = "/profile/1";
-    anchor.dataset.internal = "";
+    const anchor = createInternalLink("/profile/1", "Profile");
     response
-      .setTitle("Home Page")
+      .setDocumentTitle("Home Page")
       .setComponent(anchor);
   })
-  .setRoute("/profile/:id", (request, response) => {
-    const anchor = document.createElement("a");
-    anchor.innerText = "Go home";
-    anchor.href = "/";
-    anchor.dataset.internal = "";
-
-    const p = document.createElement("p");
-    p.innerText = `Lorem ipsum dolor sit amet consectetur adipisicing elit. Provident ullam ut modi est optio nobis expedita vel rerum possimus mollitia doloremque suscipit culpa sapiente, rem obcaecati, eveniet aspernatur. Distinctio molestiae reiciendis repellat consectetur corrupti omnis nobis a in asperiores quos hic facilis accusantium, alias maiores id nam earum sunt fuga porro nostrum officia quis odit inventore aspernatur. Nobis temporibus officiis vel doloremque illo alias voluptate repellat maxime aliquam beatae rerum hic quae odio, dignissimos aut, cum voluptatem. Ea recusandae distinctio quibusdam quas quaerat voluptatem nisi facere quae fuga culpa minima necessitatibus tempora suscipit et debitis officia, at veniam repellat animi?`;
-
-    const fragment = new DocumentFragment();
-    fragment.append(anchor, p);
+  .setRoute("/profile/:id", async (request, response) => {
     response
-      .setTitle(`Profile ${request.params.id}`)
-      .setComponent(fragment);
+      .setDocumentTitle(`Profile ${request.params.id}`)
+      .setComponent(await ProfilePage());
   })
   .setRoute("*", (request, response) => {
     const heading = document.createElement("h1");
     heading.innerText = `Cannot get ${request.pathname}`;
     response
-      .setTitle("Page not found")
+      .setDocumentTitle("Page not found")
       .setComponent(heading);
   });
 
 router.start();
+
+function createInternalLink(href, text) {
+  const anchor = document.createElement("a");
+  anchor.innerText = text;
+  anchor.href = href;
+  anchor.dataset.internal = "";
+  return anchor;
+}
+
+async function ProfilePage() {
+  const anchor1 = createInternalLink("/", "Home");
+  const anchor2 = createInternalLink("/404", "Nowhere");
+
+  const p = document.createElement("p");
+  const res = await fetch("/api/v1/numbers");
+  const numbers = await res.json();
+  p.innerText = numbers.join(" ");
+
+  const fragment = new DocumentFragment();
+  fragment.append(anchor1, anchor2, p);
+  return fragment;
+}

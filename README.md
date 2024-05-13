@@ -1,72 +1,73 @@
-# Vanilla SPA router
+# Client-Side Router
 
 A client-side router for vanilla JavaScript projects. It allows navigating between pages without reloading.
 
 ## Usage
 
-### Define a router
+Create a router instance.
 
 ```javascript
-const router = new Router({
-  updateTitle: (title) => `${title} | My Website`
+const router = new Router();
+```
+
+Add special styling during page load.
+
+```javascript
+router.onNavigationStarted(() => {
+  document.body.classList.add("loading");
 });
 ```
 
-### Update an outlet element upon navigation
+Update UI on navigation complete.
 
 ```javascript
 const routerOutlet = document.getElementById("router-outlet");
-router.onComponentUpdate((component) => {
-  routerOutlet.replaceChildren(component);
+router.onNavigationComplete(({ component, documentTitle }) => {
+  document.title = `${documentTitle} | My Website`;
+  if (component)
+    routerOutlet.replaceChildren(component);
+  document.body.classList.remove("loading");
 });
 ```
 
-### Handle anchor links
+Make all internal links use router navigation.
 
 ```javascript
 document.addEventListener("click", (e) => {
   const { target } = e;
-
-  if (!(target instanceof HTMLAnchorElement) || !("internal" in target.dataset))
-    return;
-
-  e.preventDefault();
-  router.navigate(target.getAttribute("href"));
+  if (target instanceof HTMLAnchorElement && "internal" in target.dataset) {
+    e.preventDefault();
+    const pathname = target.getAttribute("href");
+    router.navigate(pathname);
+  }
 });
 ```
 
-### Define routes
+Define routes.
 
 ```javascript
 router
   .setRoute("/", (_, response) => {
-    const anchor = document.createElement("a");
-    anchor.innerText = "Go to profile";
-    anchor.href = "/profile/1";
-    anchor.dataset.internal = "";
+    const anchor = createInternalLink("/profile/1", "Profile");
     response
-      .setTitle("Home Page")
+      .setDocumentTitle("Home Page")
       .setComponent(anchor);
   })
-  .setRoute("/profile/:id", (request, response) => {
-    const anchor = document.createElement("a");
-    anchor.innerText = "Go home";
-    anchor.href = "/";
-    anchor.dataset.internal = "";
+  .setRoute("/profile/:id", async (request, response) => {
     response
-      .setTitle(`Profile ${request.params.id}`)
-      .setComponent(anchor);
+      .setDocumentTitle(`Profile ${request.params.id}`)
+      .setComponent(await ProfilePage());
   })
   .setRoute("*", (request, response) => {
     const heading = document.createElement("h1");
     heading.innerText = `Cannot get ${request.pathname}`;
     response
-      .setTitle("Page not found")
+      .setDocumentTitle("Page not found")
       .setComponent(heading);
   });
 ```
 
-### Initialize routing
+Start routing.
 
 ```javascript
 router.start();

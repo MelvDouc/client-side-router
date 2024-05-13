@@ -1,9 +1,9 @@
 {
-  "name": "client-router",
+  "name": "client-side-router",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "tsup",
+    "build": "tsup src/index.ts --outDir=dist --treeshake --format=esm --dts",
     "prepublishOnly": "npm run build",
     "test": "concurrently \"npm run build -- --watch\" \"node --watch test-app/server.js\""
   },
@@ -19,6 +19,7 @@
   "devDependencies": {
     "@types/node": "^20.12.11",
     "concurrently": "^8.2.2",
+    "jsr": "^0.12.4",
     "tsup": "^8.0.2",
     "typescript": "^5.4.5"
   }
