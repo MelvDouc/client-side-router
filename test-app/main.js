@@ -1,29 +1,14 @@
-# Vanilla SPA router
+import { Router } from "../dist/index.js";
 
-A client-side router for vanilla JavaScript projects. It allows navigating between pages without reloading.
-
-## Usage
-
-### Define a router
-
-```javascript
+const routerOutlet = document.getElementById("router-outlet");
 const router = new Router({
   updateTitle: (title) => `${title} | My Website`
 });
-```
 
-### Update an outlet element upon navigation
-
-```javascript
-const routerOutlet = document.getElementById("router-outlet");
 router.onComponentUpdate((component) => {
   routerOutlet.replaceChildren(component);
 });
-```
 
-### Handle anchor links
-
-```javascript
 document.addEventListener("click", (e) => {
   const { target } = e;
 
@@ -33,11 +18,7 @@ document.addEventListener("click", (e) => {
   e.preventDefault();
   router.navigate(target.getAttribute("href"));
 });
-```
 
-### Define routes
-
-```javascript
 router
   .setRoute("/", (_, response) => {
     const anchor = document.createElement("a");
@@ -53,9 +34,15 @@ router
     anchor.innerText = "Go home";
     anchor.href = "/";
     anchor.dataset.internal = "";
+
+    const p = document.createElement("p");
+    p.innerText = `Lorem ipsum dolor sit amet consectetur adipisicing elit. Provident ullam ut modi est optio nobis expedita vel rerum possimus mollitia doloremque suscipit culpa sapiente, rem obcaecati, eveniet aspernatur. Distinctio molestiae reiciendis repellat consectetur corrupti omnis nobis a in asperiores quos hic facilis accusantium, alias maiores id nam earum sunt fuga porro nostrum officia quis odit inventore aspernatur. Nobis temporibus officiis vel doloremque illo alias voluptate repellat maxime aliquam beatae rerum hic quae odio, dignissimos aut, cum voluptatem. Ea recusandae distinctio quibusdam quas quaerat voluptatem nisi facere quae fuga culpa minima necessitatibus tempora suscipit et debitis officia, at veniam repellat animi?`;
+
+    const fragment = new DocumentFragment();
+    fragment.append(anchor, p);
     response
       .setTitle(`Profile ${request.params.id}`)
-      .setComponent(anchor);
+      .setComponent(fragment);
   })
   .setRoute("*", (request, response) => {
     const heading = document.createElement("h1");
@@ -64,10 +51,5 @@ router
       .setTitle("Page not found")
       .setComponent(heading);
   });
-```
 
-### Initialize routing
-
-```javascript
 router.start();
-```

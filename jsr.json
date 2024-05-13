@@ -1,0 +1,17 @@
+{
+  "name": "@melvdouc/client-router",
+  "version": "1.0.0",
+  "exports": "./dist/index.js",
+  "publish": {
+    "include": [
+      "README.md"
+    ],
+    "exclude": [
+      "!dist",
+      "src",
+      "test-app",
+      "tsconfig.json",
+      "tsup.config.js"
+    ]
+  }
+}

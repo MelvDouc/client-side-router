@@ -1,0 +1,25 @@
+{
+  "name": "client-router",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "prepublishOnly": "npm run build",
+    "test": "concurrently \"npm run build -- --watch\" \"node --watch test-app/server.js\""
+  },
+  "keywords": [
+    "vanilla js",
+    "router",
+    "client",
+    "front-end"
+  ],
+  "author": "MelvDouc",
+  "license": "ISC",
+  "description": "A client-side router for vanilla JavaScript projects.",
+  "devDependencies": {
+    "@types/node": "^20.12.11",
+    "concurrently": "^8.2.2",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5"
+  }
+}
