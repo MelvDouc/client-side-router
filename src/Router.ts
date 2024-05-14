@@ -30,9 +30,9 @@ export default class Router {
       return this;
     }
 
-    const regexSource = pathname.replace(/:(\w+)/g, (_, p) => `(?<${p}>\\w+)`);
+    const regexSource = pathname.replace(/:([a-zA-Z_]\w*)/g, (_, p) => `(?<${p}>[^\\/]+)`);
     this._routes.push({
-      regex: RegExp("^" + regexSource + "$"),
+      regex: RegExp(`^${regexSource}$`),
       handler
     });
     return this;
