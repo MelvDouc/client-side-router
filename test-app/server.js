@@ -18,7 +18,7 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.url === "/api/v1/numbers") {
-    const numbers = Array(1e7).fill(0);
+    const numbers = Array(5e6).fill(0);
     res.setHeader("Content-Type", "application/json");
     res.end(JSON.stringify(numbers));
     return;

@@ -18,7 +18,7 @@ document.addEventListener("click", (e) => {
   const { target } = e;
   if (target instanceof HTMLAnchorElement && "internal" in target.dataset) {
     e.preventDefault();
-    const pathname = target.getAttribute("href");
+    const pathname = new URL(target.href).pathname;
     router.navigate(pathname);
   }
 });
@@ -58,11 +58,19 @@ async function ProfilePage() {
   const anchor2 = createInternalLink("/404", "Nowhere");
 
   const p = document.createElement("p");
-  const res = await fetch("/api/v1/numbers");
-  const numbers = await res.json();
+  const numbers = await getNumbers();
   p.innerText = numbers.join(" ");
 
   const fragment = new DocumentFragment();
   fragment.append(anchor1, anchor2, p);
   return fragment;
+}
+
+async function getNumbers() {
+  if (history.state.numbers)
+    return history.state.numbers;
+
+  const res = await fetch("/api/v1/numbers");
+  const numbers = await res.json();
+  return history.state.numbers = numbers;
 }

@@ -3,7 +3,7 @@ import RouterResponse from "$src/RouterResponse.js";
 import { responsePropertiesSymbol } from "$src/symbols.js";
 import type {
   Handler,
-  InferProps,
+  InferParams,
   PathName,
   Route
 } from "$src/types.js";
@@ -24,7 +24,7 @@ export default class Router {
       .setComponent(Router._getDefaultComponent());
   };
 
-  public setRoute<T extends PathName | "*">(pathname: T, handler: Handler<InferProps<T>>) {
+  public setRoute<T extends PathName | "*">(pathname: T, handler: Handler<InferParams<T>>) {
     if (pathname === "*") {
       this._defaultHandler = handler as Handler<{}>;
       return this;
@@ -39,8 +39,12 @@ export default class Router {
   }
 
   public async navigate(pathname: PathName) {
+    await this._navigate(pathname, true);
+  }
+
+  private async _navigate(pathname: PathName, updateUrl: boolean) {
     await this._startNavigation(pathname);
-    this._updatePageUrl(pathname);
+    updateUrl && this._updatePageUrl(pathname);
     await this._completeNavigation(pathname);
   }
 
@@ -53,14 +57,13 @@ export default class Router {
   }
 
   public async start() {
-    window.addEventListener("popstate", () => {
-      setTimeout(() => {
-        this.navigate(location.pathname as PathName);
-      }, 0);
+    window.addEventListener("popstate", async () => {
+      const pathname = await new Promise((resolve) => {
+        setTimeout(() => resolve(location.pathname), 0);
+      });
+      await this._navigate(pathname as PathName, false);
     });
-    const pathname = location.pathname as PathName;
-    await this._startNavigation(pathname);
-    await this._completeNavigation(pathname);
+    await this._navigate(location.pathname as PathName, false);
   }
 
   protected _updatePageUrl(pathname: PathName) {

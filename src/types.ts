@@ -10,17 +10,15 @@ interface Route<T extends Props> {
   readonly handler: Handler<T>;
 }
 
-type InferProps<S extends string, P extends Props = {}> =
-  S extends `/:${infer S2}/${infer S3}`
-  ? { [K in S2]: string } & InferProps<S3, P>
-  : S extends `/:${infer S2}`
-  ? { [K in S2]: string } & P
-  : S extends `/${infer _}/:${infer S2}`
-  ? InferProps<`/:${S2}`, P>
-  : P;
+type InferParams<T extends string> =
+  T extends `/${infer A}/${infer B}`
+  ? InferParams<`/${A}`> & InferParams<`/${B}`>
+  : T extends `/${infer A}`
+  ? (A extends `:${infer P}` ? { [K in P]: string; } : {})
+  : {};
 
 export type {
-  InferProps,
+  InferParams,
   PathName,
   Props,
   Handler,
