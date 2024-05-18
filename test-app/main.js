@@ -1,3 +1,5 @@
+// @ts-check
+
 import { Router } from "../dist/index.js";
 
 const routerOutlet = document.getElementById("router-outlet");
@@ -10,17 +12,8 @@ router.onNavigationStarted(() => {
 router.onNavigationComplete(({ component, documentTitle }) => {
   document.title = documentTitle ? `${documentTitle} | My Website` : "My Website";
   if (component)
-    routerOutlet.replaceChildren(component);
+    routerOutlet?.replaceChildren(component);
   document.body.classList.remove("loading");
-});
-
-document.addEventListener("click", (e) => {
-  const { target } = e;
-  if (target instanceof HTMLAnchorElement && "internal" in target.dataset) {
-    e.preventDefault();
-    const pathname = new URL(target.href).pathname;
-    router.navigate(pathname);
-  }
 });
 
 router
@@ -35,21 +28,29 @@ router
       .setDocumentTitle(`Profile ${request.params.id}`)
       .setComponent(await ProfilePage());
   })
-  .setRoute("*", (request, response) => {
-    const heading = document.createElement("h1");
-    heading.innerText = `Cannot get ${request.pathname}`;
+  .setRoute("*", (_request, response) => {
+    const component = document.createElement("h1");
+    component.innerText = "Page not found";
     response
-      .setDocumentTitle("Page not found")
-      .setComponent(heading);
+      .setDocumentTitle(component.innerText)
+      .setComponent(component);
   });
 
 router.start();
 
+/**
+ * @param {import("../dist/index.js").PathName} href
+ * @param {string} text
+ */
 function createInternalLink(href, text) {
   const anchor = document.createElement("a");
   anchor.innerText = text;
   anchor.href = href;
   anchor.dataset.internal = "";
+  anchor.addEventListener("click", (e) => {
+    e.preventDefault();
+    router.navigate(href);
+  });
   return anchor;
 }
 
@@ -67,10 +68,7 @@ async function ProfilePage() {
 }
 
 async function getNumbers() {
-  if (history.state.numbers)
-    return history.state.numbers;
-
   const res = await fetch("/api/v1/numbers");
   const numbers = await res.json();
-  return history.state.numbers = numbers;
+  return numbers;
 }

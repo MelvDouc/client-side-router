@@ -1,14 +1,18 @@
 import RouterRequest from "$src/RouterRequest.js";
 import RouterResponse from "$src/RouterResponse.js";
 import { responsePropertiesSymbol } from "$src/symbols.js";
+import TypedEventEmitter from "$src/TypedEventEmitter.js";
 import type {
-  Handler,
   InferParams,
   PathName,
+  Handler,
+  OptionalPromise,
   Route
 } from "$src/types.js";
 
 export default class Router {
+  protected static readonly _pathRegex = /:([a-zA-Z_]\w*)/g;
+
   protected static _getDefaultComponent() {
     const heading = document.createElement("h1");
     heading.innerText = "Page not found";
@@ -16,21 +20,26 @@ export default class Router {
   }
 
   protected readonly _routes: Route<any>[] = [];
-  protected readonly _navStartedStack: ((data: NavigationStartedData) => void | Promise<void>)[] = [];
-  protected readonly _navCompleteStack: ((data: NavigationCompleteData) => void | Promise<void>)[] = [];
+  protected readonly _eventEmitter = new TypedEventEmitter<{
+    navStarted: NavigationStartedData;
+    navComplete: NavigationCompleteData;
+  }>();
   protected _defaultHandler: Handler<{}> = (_, res) => {
     res
       .setDocumentTitle("Page not found")
       .setComponent(Router._getDefaultComponent());
   };
 
-  public setRoute<T extends PathName | "*">(pathname: T, handler: Handler<InferParams<T>>) {
+  public setRoute<T extends PathName | "*">(
+    pathname: T,
+    handler: Handler<InferParams<T>>
+  ) {
     if (pathname === "*") {
       this._defaultHandler = handler as Handler<{}>;
       return this;
     }
 
-    const regexSource = pathname.replace(/:([a-zA-Z_]\w*)/g, (_, p) => `(?<${p}>[^\\/]+)`);
+    const regexSource = pathname.replace(Router._pathRegex, (_, p) => `(?<${p}>[^\\/]+)`);
     this._routes.push({
       regex: RegExp(`^${regexSource}$`),
       handler
@@ -43,17 +52,17 @@ export default class Router {
   }
 
   private async _navigate(pathname: PathName, updateUrl: boolean) {
-    await this._startNavigation(pathname);
+    this._startNavigation(pathname);
     updateUrl && this._updatePageUrl(pathname);
     await this._completeNavigation(pathname);
   }
 
-  public onNavigationStarted(listener: (data: NavigationStartedData) => void | Promise<void>) {
-    this._navStartedStack.push(listener);
+  public onNavigationStarted(listener: NavigationStartedCallbackFn) {
+    this._eventEmitter.on("navStarted", listener);
   }
 
-  public onNavigationComplete(listener: (data: NavigationCompleteData) => void | Promise<void>) {
-    this._navCompleteStack.push(listener);
+  public onNavigationComplete(listener: NavigationCompleteCallbackFn) {
+    this._eventEmitter.on("navComplete", listener);
   }
 
   public async start() {
@@ -88,19 +97,16 @@ export default class Router {
     };
   }
 
-  protected async _startNavigation(pathname: PathName) {
-    for (const listener of this._navStartedStack)
-      await listener({ pathname });
+  protected _startNavigation(pathname: PathName) {
+    this._eventEmitter.emit("navStarted", { pathname });
   }
 
   protected async _completeNavigation(pathname: PathName) {
     const { request, response, handler } = this._findHandlerArgs(pathname);
     await handler(request, response);
-    const responseProps = response[responsePropertiesSymbol];
-    const data = { ...responseProps, pathname };
-
-    for (const listener of this._navCompleteStack)
-      await listener(data);
+    const { documentTitle, component } = response[responsePropertiesSymbol];
+    const navData = { pathname, documentTitle, component };
+    this._eventEmitter.emit("navComplete", navData);
   }
 }
 
@@ -116,3 +122,6 @@ interface NavigationCompleteData {
    */
   component: Node | null;
 }
+
+type NavigationStartedCallbackFn = (data: NavigationStartedData) => OptionalPromise<void>;
+type NavigationCompleteCallbackFn = (data: NavigationCompleteData) => OptionalPromise<void>;
