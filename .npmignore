@@ -1,4 +1,9 @@
-*
-!/dist
-!/package.json
-!/README.md
+.vscode
+
+node_modules
+
+local
+src
+
+.gitignore
+tsconfig.json
