@@ -2,73 +2,44 @@
 
 A client-side router for vanilla JavaScript projects. It allows navigating between pages without reloading.
 
-## Usage
+## Example use
 
-Create a router instance.
+```typescript
+import { navigate, redirect, Route, Router } from "client-side-router";
 
-```javascript
-const router = new Router();
-```
-
-Add special styling during page load.
-
-```javascript
-router.onNavigationStarted(() => {
-  document.body.classList.add("loading");
+const router = Router({
+  children: [
+    Route({ path: "/", title: "Home", component: HomePage }),
+    Route({ path: "/profile/:id", title: "About", component: ProfilePage }),
+    Route({ path: ".*", title: "Page not found", component: NotFoundPage })
+  ],
+  onNavigationStarted: () => {
+    console.log("nav started");
+  },
+  onNavigationComplete: ({ title }) => {
+    if (title === "Page not found")
+      setTimeout(() => navigate("/"), 5000);
+  },
 });
-```
+document.body.appendChild(router);
 
-Update UI on navigation complete.
+function createElement(tagName: string, innerText: string) {
+  const element = document.createElement(tagName);
+  element.innerText = innerText;
+  return element;
+}
 
-```javascript
-const routerOutlet = document.getElementById("router-outlet");
-router.onNavigationComplete(({ component, documentTitle }) => {
-  document.title = `${documentTitle} | My Website`;
-  if (component)
-    routerOutlet.replaceChildren(component);
-  document.body.classList.remove("loading");
-});
-```
+function HomePage() {
+  return createElement("h1", "Home");
+}
 
-Make all internal links use router navigation.
+function ProfilePage({ id }: { id: string; }) {
+  if (prompt("Are you a bot?") === "yes")
+    throw redirect("/");
+  return createElement("h1", `Profile ${id}`);
+}
 
-```javascript
-document.addEventListener("click", (e) => {
-  const { target } = e;
-  if (target instanceof HTMLAnchorElement && "internal" in target.dataset) {
-    e.preventDefault();
-    const pathname = target.getAttribute("href");
-    router.navigate(pathname);
-  }
-});
-```
-
-Define routes.
-
-```javascript
-router
-  .setRoute("/", (_, response) => {
-    const anchor = createInternalLink("/profile/1", "Profile");
-    response
-      .setDocumentTitle("Home Page")
-      .setComponent(anchor);
-  })
-  .setRoute("/profile/:id", async (request, response) => {
-    response
-      .setDocumentTitle(`Profile ${request.params.id}`)
-      .setComponent(await ProfilePage());
-  })
-  .setRoute("*", (request, response) => {
-    const heading = document.createElement("h1");
-    heading.innerText = `Cannot get ${request.pathname}`;
-    response
-      .setDocumentTitle("Page not found")
-      .setComponent(heading);
-  });
-```
-
-Start routing.
-
-```javascript
-router.start();
+function NotFoundPage() {
+  return createElement("p", "Page not found");
+}
 ```

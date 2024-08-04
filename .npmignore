@@ -1,8 +1,4 @@
-.vscode
-node_modules
-src
-test-app
-
-.gitignore
-tsconfig.json
-tsup.config.js
+*
+!/dist
+!/package.json
+!/README.md
