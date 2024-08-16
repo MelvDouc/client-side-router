@@ -1,4 +1,4 @@
-export default function Cached<K, V>(method: (arg: K, ...args: unknown[]) => V, ctx: ClassMethodDecoratorContext<any>) {
+export default function Cached<K, V>(method: (arg: K, ...args: unknown[]) => V, ctx: ClassMethodDecoratorContext<any>): void {
   const cache = new Map<K, V>();
 
   ctx.addInitializer(function () {
