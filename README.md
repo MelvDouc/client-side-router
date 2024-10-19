@@ -35,7 +35,7 @@ function HomePage() {
 
 function ProfilePage({ id }: { id: string; }) {
   if (prompt("Are you a bot?") === "yes")
-    throw redirect("/");
+    redirect("/");
   return createElement("h1", `Profile ${id}`);
 }
 

@@ -1,1 +1,0 @@
-export default class UnhandledNavigationError extends Error { }
