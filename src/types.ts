@@ -11,6 +11,7 @@ export type StringRecord = Record<string, string>;
 export type Component<P extends StringRecord> = (params: P) => OptionalPromise<Node>;
 
 export type TitleFn<P extends StringRecord> = (params: P) => string;
+export type TitleTransformFn = ((title: string) => string);
 
 interface NavStartedParams {
   path: string;

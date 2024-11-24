@@ -6,11 +6,24 @@ import type {
   NavCompleteCallback,
   NavStartedCallback,
   StringRecord,
-  TitleFn
+  TitleFn,
+  TitleTransformFn
 } from "$src/types.js";
 
-export default function Router({ children = [], onNavigationStarted: navStartedCallback = null, onNavigationComplete: navCompleteCallback = null }: RouterOutletParams): RouterOutlet {
-  return new RouterOutlet(children, navStartedCallback, navCompleteCallback);
+export default function Router({
+  children = [],
+  onNavigationStarted: navStartedCallback = null,
+  onNavigationComplete: navCompleteCallback = null,
+  baseUrl,
+  titleTransformFn
+}: RouterOutletParams): RouterOutlet {
+  return new RouterOutlet(
+    children,
+    navStartedCallback,
+    navCompleteCallback,
+    baseUrl,
+    titleTransformFn
+  );
 }
 
 export function Route<Path extends string>({ path, title, component }: RouteParams<Path>): _Route<Path> {
@@ -21,8 +34,8 @@ export function Route<Path extends string>({ path, title, component }: RoutePara
  * Navigate to a given path.
  * @param path The pathname to the desired location.
  */
-export function navigate(path: string): void {
-  RouterOutlet.navigate(path);
+export async function navigate(path: string): Promise<void> {
+  await RouterOutlet.navigate(path);
 }
 
 /**
@@ -37,6 +50,8 @@ interface RouterOutletParams {
   children?: _Route<string>[];
   onNavigationStarted?: NavStartedCallback | null;
   onNavigationComplete?: NavCompleteCallback | null;
+  baseUrl?: string;
+  titleTransformFn?: TitleTransformFn;
 }
 
 interface RouteParams<Path extends string, Params extends StringRecord = InferParams<Path>> {

@@ -3,7 +3,7 @@ import CustomElement from "$src/decorators/CustomElement.js";
 import PageNotFoundError from "$src/errors/PageNotFoundError.js";
 import RedirectError from "$src/errors/RedirectError.js";
 import type Route from "$src/Route.js";
-import type { NavCompleteCallback, NavStartedCallback, OptionalPromise } from "$src/types.js";
+import type { NavCompleteCallback, NavStartedCallback, OptionalPromise, TitleTransformFn } from "$src/types.js";
 
 @CustomElement("router-outlet")
 export default class RouterOutlet extends HTMLElement {
@@ -23,10 +23,16 @@ export default class RouterOutlet extends HTMLElement {
     throw new RedirectError(path);
   }
 
+  private static defaultTitleTransform(title: string): string {
+    return title;
+  }
+
   public constructor(
     private readonly _routes: Route<string>[],
-    private readonly navStartedCallback: NavStartedCallback | null,
-    private readonly navCompleteCallback: NavCompleteCallback | null
+    private readonly _navStartedCallback: NavStartedCallback | null,
+    private readonly _navCompleteCallback: NavCompleteCallback | null,
+    private readonly _baseUrl = "",
+    private readonly _titleTransformFn: TitleTransformFn = RouterOutlet.defaultTitleTransform
   ) {
     super();
     RouterOutlet.instance = this;
@@ -68,17 +74,19 @@ export default class RouterOutlet extends HTMLElement {
   }
 
   private async _handleNavigation(path: string): Promise<void> {
-    if (path !== location.pathname)
-      history.pushState({}, "", path);
+    const realPath = this._baseUrl + path;
 
-    if (this.navStartedCallback)
-      await this.navStartedCallback({ path });
+    if (realPath !== location.pathname)
+      history.pushState({}, "", realPath);
+
+    if (this._navStartedCallback)
+      await this._navStartedCallback({ path });
 
     const [title, component] = this._findUIParams(path);
     await this._updateUI(title, component);
 
-    if (this.navCompleteCallback)
-      await this.navCompleteCallback({ path, title });
+    if (this._navCompleteCallback)
+      await this._navCompleteCallback({ path, title });
   }
 
   private async _handleRedirection(targetPath: string): Promise<void> {
@@ -110,7 +118,7 @@ export default class RouterOutlet extends HTMLElement {
   }
 
   private async _updateUI(title: string, component: ReadyComponent) {
-    document.title = title;
+    document.title = this._titleTransformFn(title);
     this.replaceChildren(await component());
   }
 
