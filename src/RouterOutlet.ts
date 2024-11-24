@@ -46,10 +46,7 @@ export default class RouterOutlet extends HTMLElement {
       await this._navigate(location.pathname);
     });
 
-    // 2 - modify anchors behavior
-    document.addEventListener("click", this._createAnchorHandler());
-
-    // 3 - navigate on connection to DOM
+    // 2 - navigate on connection to DOM
     await this._navigate(location.pathname);
   }
 
@@ -120,21 +117,6 @@ export default class RouterOutlet extends HTMLElement {
   private async _updateUI(title: string, component: ReadyComponent) {
     document.title = this._titleTransformFn(title);
     this.replaceChildren(await component());
-  }
-
-  private _createAnchorHandler(): (e: Event) => Promise<void> {
-    return async (e: Event): Promise<void> => {
-      if (!(e.target instanceof HTMLAnchorElement))
-        return;
-
-      const url = new URL(e.target.href);
-
-      if (url.origin !== location.origin)
-        return;
-
-      e.preventDefault();
-      await this._navigate(url.pathname);
-    };
   }
 }
 
