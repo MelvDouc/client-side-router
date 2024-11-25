@@ -1,1 +1,1 @@
-export { default as Router, Route, navigate, redirect } from "$src/Router.js";
+export { Router, Route, navigate, redirect } from "$src/exports.js";

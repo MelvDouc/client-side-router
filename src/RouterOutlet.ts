@@ -2,7 +2,7 @@ import Cached from "$src/decorators/Cached.js";
 import CustomElement from "$src/decorators/CustomElement.js";
 import PageNotFoundError from "$src/errors/PageNotFoundError.js";
 import RedirectError from "$src/errors/RedirectError.js";
-import type Route from "$src/Route.js";
+import Route from "$src/Route.js";
 import type { NavCompleteCallback, NavStartedCallback, OptionalPromise, TitleTransformFn } from "$src/types.js";
 
 @CustomElement("router-outlet")
@@ -27,14 +27,19 @@ export default class RouterOutlet extends HTMLElement {
     return title;
   }
 
-  public constructor(
-    private readonly _routes: Route<string>[],
-    private readonly _navStartedCallback: NavStartedCallback | null,
-    private readonly _navCompleteCallback: NavCompleteCallback | null,
-    private readonly _baseUrl = "",
-    private readonly _titleTransformFn: TitleTransformFn = RouterOutlet.defaultTitleTransform
-  ) {
+  private readonly _routes: Route<string>[];
+  private readonly _navStartedCallback: NavStartedCallback | null;
+  private readonly _navCompleteCallback: NavCompleteCallback | null;
+  private readonly _basePath: string;
+  private readonly _titleTransformFn: TitleTransformFn;
+
+  public constructor(params: RouterOutletParams) {
     super();
+    this._routes = params.children ?? [];
+    this._navStartedCallback = params.onNavigationStarted ?? null;
+    this._navCompleteCallback = params.onNavigationComplete ?? null;
+    this._basePath = params.basePath ?? "";
+    this._titleTransformFn = params.titleTransformFn ?? RouterOutlet.defaultTitleTransform;
     RouterOutlet.instance = this;
   }
 
@@ -43,11 +48,11 @@ export default class RouterOutlet extends HTMLElement {
 
     // 1 - handle popState
     window.addEventListener("popstate", async () => {
-      await this._navigate(location.pathname);
+      await this._navigateToCurrentLocation();
     });
 
     // 2 - navigate on connection to DOM
-    await this._navigate(location.pathname);
+    await this._navigateToCurrentLocation();
   }
 
   private async _navigate(path: string): Promise<void> {
@@ -70,20 +75,25 @@ export default class RouterOutlet extends HTMLElement {
     }
   }
 
-  private async _handleNavigation(path: string): Promise<void> {
-    const realPath = this._baseUrl + path;
+  private async _navigateToCurrentLocation(): Promise<void> {
+    const path = location.pathname.slice(this._basePath.length);
+    await this._navigate(path);
+  }
 
-    if (realPath !== location.pathname)
-      history.pushState({}, "", realPath);
+  private async _handleNavigation(shortPath: string): Promise<void> {
+    const fullPath = this._basePath + shortPath;
+
+    if (location.pathname !== fullPath)
+      history.pushState({}, "", fullPath);
 
     if (this._navStartedCallback)
-      await this._navStartedCallback({ path });
+      await this._navStartedCallback({ path: shortPath });
 
-    const [title, component] = this._findUIParams(path);
+    const [title, component] = this._findUIParams(shortPath);
     await this._updateUI(title, component);
 
     if (this._navCompleteCallback)
-      await this._navCompleteCallback({ path, title });
+      await this._navCompleteCallback({ path: shortPath, title });
   }
 
   private async _handleRedirection(targetPath: string): Promise<void> {
@@ -120,5 +130,21 @@ export default class RouterOutlet extends HTMLElement {
   }
 }
 
+// ===== ===== ===== ===== =====
+// TYPES
+// ===== ===== ===== ===== =====
+
 type ReadyComponent = () => OptionalPromise<Node>;
 type UIParams = [title: string, component: ReadyComponent];
+
+export interface RouterOutletParams {
+  children?: Route<string>[];
+  onNavigationStarted?: NavStartedCallback | null;
+  onNavigationComplete?: NavCompleteCallback | null;
+  /**
+   * A pathname prefix as in "my-website.com/BASE_PATH/home".
+   * @default ""
+   */
+  basePath?: string;
+  titleTransformFn?: TitleTransformFn;
+}
