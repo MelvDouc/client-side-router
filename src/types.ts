@@ -1,4 +1,8 @@
+import type RequestKind from "$/src/context/RequestKind";
+
 export type OptionalPromise<T> = T | Promise<T>;
+export type ComponentParams = Record<string, string>;
+export type Component<T extends ComponentParams = ComponentParams> = (params: T) => OptionalPromise<string | Node>;
 
 export type InferParams<T extends string> =
   T extends `${infer A}/${infer B}` ? InferParams<A> & InferParams<B>
@@ -6,22 +10,10 @@ export type InferParams<T extends string> =
   : T extends `:${infer A}` ? { [K in A]: string }
   : {};
 
-export type StringRecord = Record<string, string>;
-
-export type Component<P extends StringRecord> = (params: P) => OptionalPromise<Node>;
-
-export type TitleFn<P extends StringRecord> = (params: P) => string;
-export type TitleTransformFn = ((title: string) => string);
-
-interface NavStartedParams {
-  path: string;
+export interface NavCompleteResult {
+  requestKind: RequestKind;
+  pathName: string;
+  routeName: string;
+  params: ComponentParams;
+  component: Component;
 }
-
-export type NavStartedCallback = (navStartedParams: NavStartedParams) => unknown;
-
-interface NavCompleteParams {
-  path: string;
-  title: string;
-}
-
-export type NavCompleteCallback = (navCompleteParams: NavCompleteParams) => unknown;

@@ -4,6 +4,8 @@ node_modules
 
 local
 src
+tests
 
 .gitignore
 tsconfig.json
+vitest.config.ts

@@ -1,1 +1,1 @@
-export { Router, Route, navigate, redirect } from "$src/exports.js";
+export * from "$/src/navigation";
