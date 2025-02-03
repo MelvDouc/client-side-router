@@ -16,8 +16,8 @@
         "./*"
       ]
     },
-    "jsx": "preserve",
-    "jsxFactory": "createElement",
-    "jsxFragmentFactory": "Fragment"
+    "jsx": "react",
+    "jsxFactory": "Dsx.createElement",
+    "jsxFragmentFactory": "Dsx.Fragment"
   }
 }

@@ -1,5 +1,7 @@
-import "reactfree-jsx";
+import { initDsx } from "@melvdouc/dsx";
 import { Route, Router, navigateToRoute } from "$/src/index";
+
+initDsx();
 
 export function App() {
   const onNavStarted = () => {
@@ -44,7 +46,7 @@ function ProfilePage({ id }: { id: string; }) {
   return (
     <>
       <h1>Profile {id}</h1>
-      <button id="next-profile" onclick={goToNextProfile}>Next profile</button>
+      <button id="next-profile" on:click={goToNextProfile}>Next profile</button>
     </>
   );
 }

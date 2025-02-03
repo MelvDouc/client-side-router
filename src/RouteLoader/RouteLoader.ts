@@ -10,9 +10,8 @@ const definitions = new Map<string, RouteDefinition>();
 const responseCache = new Map<string, NavResponse | null>();
 
 function addRouteDefinition(path: string, component: Component, routeName?: string): void {
-  routeName ??= nextName();
   const routeDefinition = new RouteDefinition(path, component);
-  definitions.set(routeName, routeDefinition);
+  definitions.set(routeName ?? nextName(), routeDefinition);
 }
 
 function createRequestFromRouteName(routeName: string, params: ComponentParams): NavRequest {

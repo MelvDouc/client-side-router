@@ -1,6 +1,6 @@
 {
   "name": "client-side-router",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "type": "module",
   "exports": {
     "default": "./dist/index.js",
@@ -21,8 +21,8 @@
   "license": "ISC",
   "description": "A client-side router for vanilla JavaScript projects.",
   "devDependencies": {
+    "@melvdouc/dsx": "npm:@jsr/melvdouc__dsx@^0.1.7",
     "jsdom": "^25.0.1",
-    "reactfree-jsx": "^1.7.0",
     "tsup": "^8.2.4",
     "typescript": "^5.5.4",
     "vite-tsconfig-paths": "^5.1.4",
