@@ -23,7 +23,7 @@ export function App() {
         </ul>
       </nav>
       <main>
-        <Router onNavStarted={onNavStarted} onNavComplete={onNavComplete}>
+        <Router onNavStarted={onNavStarted} onNavComplete={onNavComplete} internalLinks>
           <Route path="/" component={HomePage} name="app_home" />
           <Route path="/profile/:id" component={ProfilePage} name="app_profile" />
         </Router>

@@ -16,7 +16,7 @@ import type {
  * @param params The router parameters.
  * @returns A container element whose children will be dynamically updated on every navigation request.
  */
-export function Router({ basePath = "", onNavStarted, onNavComplete }: {
+export function Router({ basePath = "", onNavStarted, onNavComplete, internalLinks = false }: {
   /**
    * A prefix for all path names.
    * It must match the pattern `^(/[^/]+)*$`.
@@ -35,6 +35,12 @@ export function Router({ basePath = "", onNavStarted, onNavComplete }: {
    */
   onNavComplete?: (result: NavCompleteResult) => OptionalPromise<void>;
   /**
+   * Whether to use this router automatically
+   * when an anchor that redirects to an internal page is clicked.
+   * @default false
+   */
+  internalLinks?: boolean;
+  /**
    * An array of calls to the `Route` function.
    * Every call to route creates a new route definition
    * but nothing is appended to the element returned by `Router`.
@@ -47,7 +53,7 @@ export function Router({ basePath = "", onNavStarted, onNavComplete }: {
   if (onNavComplete)
     EventBus.onNavComplete(onNavComplete);
 
-  return new RouterOutlet(basePath);
+  return new RouterOutlet(basePath, internalLinks);
 }
 
 /**

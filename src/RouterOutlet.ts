@@ -6,10 +6,12 @@ import RouteLoader from "$/src/RouteLoader/RouteLoader";
 
 export default class RouterOutlet extends HTMLElement {
   private readonly _basePath: string;
+  private readonly _handleInternalLinks: boolean;
 
-  public constructor(basePath: string) {
+  public constructor(basePath: string, handleInternalLinks: boolean) {
     super();
     this._basePath = basePath;
+    this._handleInternalLinks = handleInternalLinks;
     this.style.display = "contents";
   }
 
@@ -24,9 +26,10 @@ export default class RouterOutlet extends HTMLElement {
     });
 
     // Handle local links.
-    document.addEventListener("click", (e) => {
-      this._handleAnchorClick(e);
-    });
+    if (this._handleInternalLinks)
+      document.addEventListener("click", (e) => {
+        this._handleAnchorClick(e);
+      });
 
     // Manage requests.
     EventBus.onNavRequest(async (request) => {
@@ -66,7 +69,7 @@ export default class RouterOutlet extends HTMLElement {
   }
 
   private _handleAnchorClick(e: MouseEvent): void {
-    if (!(e.target instanceof HTMLAnchorElement))
+    if (!(e.target instanceof HTMLAnchorElement) || e.ctrlKey)
       return;
 
     const url = new URL(e.target.href);
